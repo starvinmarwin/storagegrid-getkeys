@@ -1,0 +1,36 @@
+---
+  - name: Get user authorization token for Tenant
+    uri:
+      url: "{{ grid_admin_base_url }}/api/v3/authorize"
+      method: POST
+      body: {
+        "accountId": "{{ tenant_id }}",
+        "username": "{{ storagegrid_login_username }}",
+        "password": "{{ storagegrid_login_password }}",
+        "cookie": false,
+        "csrfToken": false
+      }
+      body_format: json
+      validate_certs: false
+    register: local_auth
+    
+  - name: Get all keys for all users
+    uri:
+      url: "{{ grid_admin_base_url }}/api/v3/org/users/{{ item }}/s3-access-keys"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ local_auth.json.data }}"
+      body_format: json
+      validate_certs: false
+    with_items: "{{ useridlist }}"
+    register: access_keys
+    
+  - debug:
+      var: access_keys
+    
+  - name: Extract all keys
+    set_fact:
+        keylistlist_final: "{{ access_keys.results | json_query('[].json.data[*].displayName') | list | flatten }}"
+    
+  - debug:
+      var: keylistlist_final
