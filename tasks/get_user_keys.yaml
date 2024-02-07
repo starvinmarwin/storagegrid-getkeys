@@ -25,9 +25,6 @@
     with_items: "{{ useridlist }}"
     register: access_keys
     
-  - debug:
-      var: access_keys
-    
   - name: Extract all keys
     set_fact:
         keylistlist_final: "{{ access_keys.results | json_query('[].json.data[*].displayName') | list | flatten }}"
