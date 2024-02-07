@@ -1,0 +1,50 @@
+---
+  - name: Get grid authorization token
+    uri:
+      url: "{{ grid_admin_base_url }}/api/v3/authorize"
+      method: POST
+      body: {
+        "username": "{{ netapp_username }}",
+        "password": "{{ netapp_password }}",
+        "cookie": false,
+        "csrfToken": false
+      }
+      body_format: json
+      validate_certs: false
+    register: auth
+  
+  - name: Get all account data
+    uri:
+      url: "{{ grid_admin_base_url }}api/v3/grid/accounts?limit=300"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ auth.json.data }}"
+      body_format: json
+      validate_certs: false
+    register: info
+    
+  - set_fact:
+      allids: "{{ item.id }}"
+    loop: "{{ info.json.data }}"
+    register: allids
+  
+  - name: Build a list of all Tenant IDs
+    ansible.builtin.set_fact:
+      idlist: "{{ allids.results | map(attribute='ansible_facts.allids') | list }}"
+     
+  - name: Get all buckets
+    uri:
+      url: "{{ grid_admin_base_url }}api/v3/grid/accounts/{{ item }}/usage?includeBucketDetail=true"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ auth.json.data }}"
+      body_format: json
+      validate_certs: false
+    loop: "{{ idlist }}"
+    register: bucketlist
+  
+  - name: Extract TenantID for specified bucket name
+    set_fact:
+      tenant_id: "{{ item.item }}"
+    when: item.json.data.buckets | selectattr('name', 'equalto', bucket_name) | list | count > 0
+    loop: "{{ bucketlist.results }}"
