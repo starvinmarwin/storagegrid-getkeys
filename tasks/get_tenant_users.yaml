@@ -1,0 +1,34 @@
+---
+  - name: Get user authorization token for Tenant
+    uri:
+      url: "{{ grid_admin_base_url }}/api/v3/authorize"
+      method: POST
+      body: {
+        "accountId": "{{ tenant_id }}",
+        "username": "{{ storagegrid_login_username }}",
+        "password": "{{ storagegrid_login_password }}",
+        "cookie": false,
+        "csrfToken": false
+      }
+      body_format: json
+      validate_certs: false
+    register: local_auth
+  
+  - name: Get all users for tenant
+    uri:
+      url: "{{ grid_admin_base_url }}/api/v3/org/users?type=local&limit=25"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ local_auth.json.data }}"
+      body_format: json
+      validate_certs: false
+    register: users
+
+  - set_fact:
+      allusers: "{{ item.id }}"
+    loop: "{{ users.json.data }}"
+    register: allusers
+     
+  - name: Build a list of all Tenant user IDs
+    ansible.builtin.set_fact:
+      useridlist: "{{ allusers.results | map(attribute='ansible_facts.allusers') | list }}"
