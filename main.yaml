@@ -4,7 +4,7 @@
     - netapp.storagegrid
 
   vars:
-    - grid_admin_base_url: "https://grid-admin-url/"
+    - grid_admin_base_url: "{{ grid_url }}"
 
   tasks:
     - include: tasks/get_tenantid_from_bucket.yaml
