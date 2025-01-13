@@ -1,7 +1,7 @@
 ---
   - name: Get grid authorization token
     uri:
-      url: "{{ grid_admin_base_url }}/api/v3/authorize"
+      url: "{{ grid_admin_base_url }}/api/v4/authorize"
       method: POST
       body: {
         "sg_username": "{{ netapp_username }}",
