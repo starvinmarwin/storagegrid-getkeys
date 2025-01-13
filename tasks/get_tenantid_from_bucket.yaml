@@ -4,8 +4,8 @@
       url: "{{ grid_admin_base_url }}/api/v3/authorize"
       method: POST
       body: {
-        "username": "{{ netapp_username }}",
-        "password": "{{ netapp_password }}",
+        "sg_username": "{{ netapp_username }}",
+        "sg_password": "{{ netapp_password }}",
         "cookie": false,
         "csrfToken": false
       }
