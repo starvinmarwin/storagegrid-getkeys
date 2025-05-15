@@ -2,4 +2,4 @@
 
 This playbook extracts all keys a tenant, only input variable is bucketname
 
-It assumes that root password for all tenants are equal
+It assumes that root password for all tenants are the same
